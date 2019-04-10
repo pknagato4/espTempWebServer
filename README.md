@@ -1,1 +1,1 @@
-Simple Esp web server wchih provides temperature reading from DS18b20 sensor
+Simple led strip controller based on neopixel and mqtt

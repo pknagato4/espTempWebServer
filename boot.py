@@ -1,7 +1,10 @@
-import gc, core
-from main import WebServer
-gc.collect()
-
-core.do_connect()
-ws = WebServer()
-ws.start_led_server()
+import gc
+import main
+gc.collect()
+
+mqtt_controller = main.MqttLedStripController()
+mqtt_controller.subscribe(mqtt_controller.mqtt_callback)
+while True:
+    mqtt_controller.wait_for_msg()
+
+
