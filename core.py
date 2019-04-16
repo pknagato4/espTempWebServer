@@ -1,6 +1,5 @@
 import credentials
 
-
 def do_connect():
     import network
     sta_if = network.WLAN(network.STA_IF)
