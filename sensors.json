@@ -1,0 +1,10 @@
+{
+  "sensor0": {
+    "type": "ds18x20",
+    "pin": 14
+  },
+  "sensor1": {
+    "type": "dht",
+    "pin": 4
+  }
+}

@@ -1,26 +1,28 @@
 import usocket as socket
-from machine import Pin, Timer
-import onewire, ds18x20, ujson
+import sensors
+import ujson
 import utime as time
 
 
 class WebServer:
     def __init__(self):
-        self.ds = ds18x20.DS18X20(onewire.OneWire(Pin(5)))
-        self.temperature = None
+        self.sensors = sensors.Sensors()
 
-    def update_temp(self):
-        roms = self.ds.scan()
-        self.ds.convert_temp()
-        time.sleep_ms(750)
-        self.temperature = self.ds.read_temp(roms[0])
-        print("Temperature updated")
-        return self.temperature
+    def get_measurements(self):
+        measurement = []
+        for sensor in self.sensors.get_sensors():
+            sensor.measure()
+            measurement.append(sensor.get_measurement_as_str())
+        return measurement
+
+    def get_sensor_measurements(self):
+        meas = ""
+        for measurement in self.get_measurements():
+            meas += """<p>Current temperature: """ + str(measurement) + """</p><br>"""
+        return meas
 
     def web_page(self):
-        temperature_info = ""
-        if self.temperature is not None:
-            temperature_info = """<p>Current temperature: """ + str(self.temperature) + """</p>"""
+        temperature_info = self.get_sensor_measurements()
 
         html = """
         <html>
@@ -51,15 +53,15 @@ class WebServer:
         temp = request.find('/?temperature')
         is_temp_get = request.find('/get/temperature')
         if temp != -1:
-            self.temperature = str(self.update_temp())
+
         if is_temp_get != -1:
-            val = {"value": self.temperature}
+            val = {"value": self.ds_temperature}
             response, header = ujson.dumps(val), 'Content-Type: application/json\n'
         else:
             response, header = self.web_page(), 'Content-Type: text/html\n'
         return response, header
 
-    def start_led_server(self):
+    def start(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', 80))
         s.listen(5)
